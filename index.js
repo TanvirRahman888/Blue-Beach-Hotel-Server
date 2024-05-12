@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 
 // midleware
@@ -29,17 +29,44 @@ async function run() {
         await client.connect();
 
         const featureRooms = client.db("BuleBeachHotel").collection("FeatureRooms");
+        const bookingRooms = client.db("BuleBeachHotel").collection("BookingRooms");
 
+        //Feature Rooms
+
+        app.get('/allrooms', async (req, res) => {
+                const cursor = featureRooms.find();
+                const result = await cursor.toArray();
+                res.send(result);
+        });
         app.get('/featurerooms', async (req, res) => {
-                const cursor = featureRooms.find();
+            const query = { pricePerNight: { $gt: 100 } };
+            const options = {
+                sort: { pricePerNight: -1 },
+              };
+                const cursor = featureRooms.find(query,options);
                 const result = await cursor.toArray();
-                res.json(result);
+                res.send(result);
         });
-        app.get('/featurerooms:id', async (req, res) => {
-                const cursor = featureRooms.find();
-                const result = await cursor.toArray();
-                res.json(result);
+        app.get('/allrooms/:id', async (req, res) => {
+            const id=req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await featureRooms.findOne(query)
+            res.send(result)
         });
+        app.get('/bookroom/:id', async (req, res) => {
+            const id=req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await featureRooms.findOne(query)
+            res.send(result)
+        });
+
+        //Book Room
+        app.post('/bookings', async (req,res)=>{
+            const booking = req.body;
+            console.log(booking);
+            const result=await bookingRooms.insertOne(booking);
+            res.send(result)
+        })
 
 
         // Send a ping to confirm a successful connection
