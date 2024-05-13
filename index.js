@@ -34,39 +34,44 @@ async function run() {
         //Feature Rooms
 
         app.get('/allrooms', async (req, res) => {
-                const cursor = featureRooms.find();
-                const result = await cursor.toArray();
-                res.send(result);
+            const cursor = featureRooms.find();
+            const result = await cursor.toArray();
+            res.send(result);
         });
         app.get('/featurerooms', async (req, res) => {
             const query = { pricePerNight: { $gt: 100 } };
-            const options = {
-                sort: { pricePerNight: -1 },
-              };
-                const cursor = featureRooms.find(query,options);
-                const result = await cursor.toArray();
-                res.send(result);
+            const options = { sort: { pricePerNight: -1 }, };
+            const cursor = featureRooms.find(query, options);
+            const result = await cursor.toArray();
+            res.send(result);
         });
         app.get('/allrooms/:id', async (req, res) => {
-            const id=req.params.id;
+            const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await featureRooms.findOne(query)
             res.send(result)
         });
         app.get('/bookroom/:id', async (req, res) => {
-            const id=req.params.id;
+            const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await featureRooms.findOne(query)
             res.send(result)
         });
 
         //Book Room
-        app.post('/bookings', async (req,res)=>{
+        app.post('/bookings', async (req, res) => {
             const booking = req.body;
             console.log(booking);
-            const result=await bookingRooms.insertOne(booking);
+            const result = await bookingRooms.insertOne(booking);
             res.send(result)
-        })
+        });
+        app.get('/bookings/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: { $eq: email } };
+            const cursor = bookingRooms.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        });
 
 
         // Send a ping to confirm a successful connection
