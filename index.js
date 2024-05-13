@@ -59,18 +59,30 @@ async function run() {
         });
 
         //Book Room
-        app.post('/bookings', async (req, res) => {
-            const booking = req.body;
-            console.log(booking);
-            const result = await bookingRooms.insertOne(booking);
-            res.send(result)
-        });
         app.get('/bookings/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: { $eq: email } };
             const cursor = bookingRooms.find(query);
             const result = await cursor.toArray();
             res.send(result);
+        });
+        
+        app.post('/bookings', async (req, res) => {
+            const booking = req.body;
+            console.log(booking);
+            const result = await bookingRooms.insertOne(booking);
+            res.send(result)
+        });
+
+        app.delete('/bookings/:id', async (req, res) =>{
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await bookingRooms.deleteOne(query)
+            res.send(result);
+        });
+        app.patch('/bookings/:id', async (req, res) =>{
+            const updatedBooking=req.body;
+            console.log(updatedBooking);
         });
 
 
