@@ -38,6 +38,15 @@ async function run() {
             const result = await cursor.toArray();
             res.send(result);
         });
+        app.get('/allroomsbysort', async (req, res) => {
+            const query = { availability: true };
+            const options = {
+                sort: { pricePerNight: 1 },
+              };
+            const cursor = featureRooms.find(query,options);
+            const result = await cursor.toArray();
+            res.send(result);
+        });
         app.get('/featurerooms', async (req, res) => {
             const query = { pricePerNight: { $gt: 100 } };
             const options = { sort: { pricePerNight: -1 }, };
