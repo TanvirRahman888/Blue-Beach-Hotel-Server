@@ -114,14 +114,14 @@ async function run() {
         app.patch('/confirmbooking/:id', async (req, res) =>{
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
-            const featureRooms=req.body;
-            console.log(featureRooms);
+            const bookRooms=req.body;
+            console.log(bookRooms);
             const updateDoc = {
                 $set: {
-                    availability: featureRooms.availability
+                    availability: bookRooms.availability
                 },
               };
-            const result= await bookingRooms.updateOne(filter,updateDoc );
+            const result= await featureRooms.updateOne(filter,updateDoc );
             res.send(result)
         });
 
