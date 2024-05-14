@@ -67,6 +67,7 @@ async function run() {
             res.send(result)
         });
 
+
         //Book Room
         app.get('/bookings/:email', async (req, res) => {
             const email = req.params.email;
@@ -97,6 +98,27 @@ async function run() {
             const updateDoc = {
                 $set: {
                     status: updatedBooking.status
+                },
+              };
+            const result= await bookingRooms.updateOne(filter,updateDoc );
+            res.send(result)
+        });
+
+        // -----------------
+        app.get('/confirmbooking/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await featureRooms.findOne(query)
+            res.send(result);
+        });
+        app.patch('/confirmbooking/:id', async (req, res) =>{
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const featureRooms=req.body;
+            console.log(featureRooms);
+            const updateDoc = {
+                $set: {
+                    availability: featureRooms.availability
                 },
               };
             const result= await bookingRooms.updateOne(filter,updateDoc );
