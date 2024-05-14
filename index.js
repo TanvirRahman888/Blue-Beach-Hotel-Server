@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+var jwt = require('jsonwebtoken');
 const app = express();
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -31,8 +32,17 @@ async function run() {
         const featureRooms = client.db("BuleBeachHotel").collection("FeatureRooms");
         const bookingRooms = client.db("BuleBeachHotel").collection("BookingRooms");
 
-        //Feature Rooms
+        // JWT Auth API
+        app.post('/jwt', async(req, res)=>{
+            const user = req.body;
+            console.log(user);
+            const token=jwt.sign(user, 'secret', { expiresIn: '1h' });
+            res.send(token)
+        })
 
+
+
+        //Feature Rooms
         app.get('/allrooms', async (req, res) => {
             const cursor = featureRooms.find();
             const result = await cursor.toArray();
