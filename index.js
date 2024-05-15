@@ -1,14 +1,19 @@
 const express = require('express');
 const cors = require('cors');
-var jwt = require('jsonwebtoken');
 const app = express();
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser')
 const port = process.env.PORT || 5000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 
 // midleware
-app.use(cors());
+app.use(cors({
+    origin: ['http://localhost:5173'],  
+    credentials: true
+}));
 app.use(express.json());
+app.use(cookieParser())
 
 console.log(process.env.DB_USER);
 console.log(process.env.DB_PASS);
@@ -33,11 +38,17 @@ async function run() {
         const bookingRooms = client.db("BuleBeachHotel").collection("BookingRooms");
 
         // JWT Auth API
-        app.post('/jwt', async(req, res)=>{
+        app.post('/jwt', async (req, res) => {
             const user = req.body;
             console.log(user);
-            const token=jwt.sign(user, 'secret', { expiresIn: '1h' });
-            res.send(token)
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+
+            res
+                .cookie('token', token, {
+                    httpOnly: true,
+                    secure: false,
+                })
+                .send({ success: true })
         })
 
 
@@ -52,8 +63,8 @@ async function run() {
             const query = { availability: true };
             const options = {
                 sort: { pricePerNight: 1 },
-              };
-            const cursor = featureRooms.find(query,options);
+            };
+            const cursor = featureRooms.find(query, options);
             const result = await cursor.toArray();
             res.send(result);
         });
@@ -81,12 +92,13 @@ async function run() {
         //Book Room
         app.get('/bookings/:email', async (req, res) => {
             const email = req.params.email;
+            console.log('Token', req.cookies.token);
             const query = { email: { $eq: email } };
             const cursor = bookingRooms.find(query);
             const result = await cursor.toArray();
             res.send(result);
         });
-        
+
         app.post('/bookings', async (req, res) => {
             const booking = req.body;
             console.log(booking);
@@ -94,23 +106,23 @@ async function run() {
             res.send(result)
         });
 
-        app.delete('/bookings/:id', async (req, res) =>{
+        app.delete('/bookings/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await bookingRooms.deleteOne(query)
             res.send(result);
         });
-        app.patch('/bookings/:id', async (req, res) =>{
+        app.patch('/bookings/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
-            const updatedBooking=req.body;
+            const updatedBooking = req.body;
             console.log(updatedBooking);
             const updateDoc = {
                 $set: {
                     status: updatedBooking.status
                 },
-              };
-            const result= await bookingRooms.updateOne(filter,updateDoc );
+            };
+            const result = await bookingRooms.updateOne(filter, updateDoc);
             res.send(result)
         });
 
@@ -121,17 +133,17 @@ async function run() {
             const result = await featureRooms.findOne(query)
             res.send(result);
         });
-        app.patch('/confirmbooking/:id', async (req, res) =>{
+        app.patch('/confirmbooking/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) };
-            const bookRooms=req.body;
+            const bookRooms = req.body;
             console.log(bookRooms);
             const updateDoc = {
                 $set: {
                     availability: bookRooms.availability
                 },
-              };
-            const result= await featureRooms.updateOne(filter,updateDoc );
+            };
+            const result = await featureRooms.updateOne(filter, updateDoc);
             res.send(result)
         });
 
